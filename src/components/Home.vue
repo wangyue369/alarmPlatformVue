@@ -4,64 +4,90 @@
     <el-header>
       <div>
         <img src="../assets/alarm.png"
-             alt="">
+             alt="" />
         <span>运维告警平台</span>
       </div>
     </el-header>
     <!-- 侧面主题区域 -->
     <el-container>
       <!-- 侧边栏 -->
-      <el-aside width="200px">
-        <el-menu background-color="#545c64"
+      <el-aside :width="isCollapse ? '64px' : '200px'">
+        <div class="toggle-button"
+             @click="toggleCollapse">|||</div>
+        <el-menu background-color="#333744"
                  text-color="#fff"
-                 active-text-color="#ffd04b">
+                 active-text-color="#409EFF"
+                 unique-opened
+                 :collapse="isCollapse"
+                 :collapse-transition="false"
+                 :router="true"
+                 :default-active="activePath">
           <!-- 一级菜单 -->
-          <el-submenu index="1">
+          <el-submenu :index="item.pk + ' '"
+                      v-for="item in menulist"
+                      :key="item.pk">
             <!-- 一级菜单的模板区 -->
             <template slot="title">
               <!-- 图标 -->
-              <i class="el-icon-bell"></i>
+              <i class="el-icon-menu"></i>
               <!-- 文本 -->
-              <span>告警渠道</span>
+              <span>{{ item.name }}</span>
             </template>
             <!-- 二级菜单 -->
-            <el-menu-item index="1-4-1">
+            <el-menu-item :index="'/' + subItem.fields.level_two_type"
+                          v-for="subItem in item.childs"
+                          :key="subItem.pk"
+                          @click="savenavState('/' + subItem.fields.level_two_type)">
               <template slot="title">
                 <!-- 图标 -->
-                <i class="iconfont icon-qiyeweixin"></i>
+                <i class="el-icon-bell"></i>
                 <!-- 文本 -->
-                <span>企业微信</span>
-              </template>
-            </el-menu-item>
-
-            <el-menu-item index="1-4-1">
-              <template slot="title">
-                <!-- 图标 -->
-                <i class="iconfont icon-dingtalk"></i>
-                <!-- 文本 -->
-                <span>钉钉</span>
-              </template>
-            </el-menu-item>
-
-            <el-menu-item index="1-4-1">
-              <template slot="title">
-                <!-- 图标 -->
-                <i class="iconfont icon-zhifeiji"></i>
-                <!-- 文本 -->
-                <span>飞书</span>
+                <span>{{ subItem.fields.level_two_name }}</span>
               </template>
             </el-menu-item>
           </el-submenu>
         </el-menu>
       </el-aside>
       <!-- 右侧内容主体 -->
-      <el-main>Main</el-main>
+      <el-main>
+        <!-- 路由占位符 -->
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
 <script>
 export default {
-  name: 'Home'
+  data () {
+    return {
+      menulist: [],
+      isCollapse: false,
+      // 被激活的链接地址
+      activePath: ''
+    }
+  },
+  created () {
+    this.getMenuList()
+    this.activePath = window.sessionStorage.getItem('activePath')
+  },
+  methods: {
+    async getMenuList () {
+      const { data: res } = await this.$http.get('navigation/get.json')
+      if (res.status !== 200) return this.$message.error(res.message)
+      this.menulist = res.data
+      console.log(res)
+    },
+    toggleCollapse () {
+      // 点击展开关闭导航菜单
+      this.isCollapse = !this.isCollapse
+    },
+    // 保存链接的机会状态
+    savenavState (activePath) {
+      console.log(activePath)
+      window.sessionStorage.setItem('activePath', activePath)
+      this.activePath = activePath
+    }
+  }
 }
 </script>
 <style lang="less" scoped>
@@ -88,11 +114,23 @@ export default {
 }
 .el-aside {
   background-color: #333744;
+  .el-menu {
+    border-right: 0;
+  }
 }
 .el-main {
   background-color: #eaedf1;
 }
 .iconfont {
   margin-right: 6px;
+}
+.toggle-button {
+  background-color: #4a5064;
+  font-size: 10px;
+  line-height: 24px;
+  color: #fff;
+  text-align: center;
+  letter-spacing: 0.2em;
+  cursor: pointer;
 }
 </style>

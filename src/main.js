@@ -9,14 +9,14 @@ import './assets/fonts/iconfont.css'
 import axios from 'axios'
 
 // 配置全局路由
-axios.defaults.baseURL = 'http://127.0.0.1:8080/alarm/v1/'
+axios.defaults.baseURL = 'http://127.0.0.1:9000/alarm/'
 Vue.prototype.$http = axios
 // 设置拦截器
-axios.interceptors.request.use(config => {
-  // console.log(config)
-  config.headers.Authorization = window.sessionStorage.getItem('token')
-  return config
-})
+// axios.interceptors.request.use(config => {
+//   // console.log(config)
+//   config.headers.Authorization = window.sessionStorage.getItem('token')
+//   return config
+// })
 Vue.config.productionTip = false
 
 new Vue({
