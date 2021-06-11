@@ -1,8 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import AlarmHistory from '../components/AlarmHistory.vue'
+import AlarmTemplate from '../components/AlarmTemplate.vue'
+import AlarmType from '../components/AlarmType.vue'
+import ChartManager from '../components/ChartManager.vue'
 import DingDing from '../components/DingDing.vue'
 import feishu from '../components/FeiShu.vue'
 import Home from '../components/Home.vue'
+import PermissionManager from '../components/PermissionManager.vue'
 import weixin from '../components/WeiXin.vue'
 import Welcome from '../components/Welcome.vue'
 
@@ -17,7 +22,12 @@ const routes = [
       { path: '/welcome', component: Welcome },
       { path: '/dingding', component: DingDing },
       { path: '/weixin', component: weixin },
-      { path: '/feishu', component: feishu }
+      { path: '/feishu', component: feishu },
+      { path: '/alarm_template', component: AlarmTemplate },
+      { path: '/alarm_history', component: AlarmHistory },
+      { path: '/alarm_type', component: AlarmType },
+      { path: '/chart_manager', component: ChartManager },
+      { path: '/permission_manager', component: PermissionManager }
     ]
   },
   {

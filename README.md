@@ -27,7 +27,7 @@ npm run lint
 
 - [展示地址]()
 - [后端 python 地址](https://github.com/wangyue369/alartPlatformPython)
-- [后端 go 地址]()
+- [后端 go 地址](https://github.com/wangyue369/alartPlatformGo)
 
 ## 目的
 
