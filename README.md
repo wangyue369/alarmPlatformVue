@@ -25,7 +25,7 @@ npm run lint
 未来完整的项目会是 前端 `vue` 后端:`python` + `django` 和 `go` + `gin`
 后端两种语言功能相同
 
-- [展示地址]()
+- [展示地址](https://alarm.wy1212.cn)
 - [后端 python 地址](https://github.com/wangyue369/alartPlatformPython)
 - [后端 go 地址](https://github.com/wangyue369/alartPlatformGo)
 

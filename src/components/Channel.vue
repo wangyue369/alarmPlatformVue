@@ -276,9 +276,10 @@ export default {
         formdata.append('channel_access', this.channelForm.channel_access)
         formdata.append('is_active', this.channelForm.is_active)
         const { data: res } = await this.$http.post('alarmChannel/create.json', formdata, { headers: { 'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryn8D9asOnAnEU4Js0' } })
-        if (res.staus !== 200) {
-          this.$message.error('添加渠道失败！')
-        }
+        console.log(res)
+        if (res.status !== 200) {
+        return this.$message.error(res.message)
+      }
         this.$message.success('添加渠道成功')
         this.dialogVisible = false
         this.getData()
