@@ -26,7 +26,7 @@
                      @click="dialogVisible=true">添加</el-button>
         </el-col>
       </el-row>
-      <!-- 用户列表区域 -->
+      <!-- 告警渠道列表区域 -->
       <el-table :data="result"
                 border
                 stripe>
@@ -49,6 +49,16 @@
             </el-switch>
           </template>
         </el-table-column>
+        <!-- 生成的渠道地址 -->
+        <el-table-column show-overflow-tooltip
+                         label="渠道请求地址"
+                         prop="channel_webhook"
+                         width="160px">
+        </el-table-column>
+        <el-table-column show-overflow-tooltip
+                         label="模板名称"
+                         prop="template_name">
+        </el-table-column>
         <el-table-column label="操作"
                          width="180px">
           <template slot-scope="scope">
@@ -59,7 +69,7 @@
               <el-button type="primary"
                          icon="el-icon-edit"
                          size="mini"
-                         @click="editChannel(scope.row.channel_id,scope.row.channel_name,scope.row.channel_access,scope.row.is_active)"></el-button>
+                         @click="editChannel(scope.row.channel_id,scope.row.channel_name,scope.row.channel_access,scope.row.template_name,scope.row.is_active)"></el-button>
             </el-tooltip>
             <el-tooltip effect="dark"
                         content="删除"
@@ -70,14 +80,6 @@
                          size="mini"
                          @click="deleteChannelById(scope.row.channel_id)"></el-button>
             </el-tooltip>
-            <!-- <el-tooltip effect="dark"
-                        content="设置"
-                        placement="top"
-                        :enterable="false">
-              <el-button type="warning"
-                         icon="el-icon-setting"
-                         size="mini"></el-button>
-            </el-tooltip> -->
           </template>
         </el-table-column>
       </el-table>
@@ -92,7 +94,7 @@
                      :total="total">
       </el-pagination>
     </el-card>
-    <!-- 添加对话框 -->
+    <!-- 添加告警渠道对话框 -->
     <el-dialog title="添加告警渠道"
                :visible.sync="dialogVisible"
                width="30%"
@@ -109,6 +111,16 @@
         <el-form-item label="渠道地址"
                       prop="channel_access">
           <el-input v-model="channelForm.channel_access"></el-input>
+        </el-form-item>
+        <el-form-item label="关联模板"
+                      prop="channel_template">
+          <el-select v-model="channelForm.channel_template"
+                     placeholder="请选择">
+            <el-option v-for="template in templates"
+                       :key="template.template_id"
+                       :label="template.template_name"
+                       :value="template.template_name"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="是否启用"
                       prop="is_active">
@@ -142,6 +154,16 @@
                       prop="channel_access">
           <el-input v-model="editChannelForm.channel_access"></el-input>
         </el-form-item>
+        <el-form-item label="关联模板"
+                      prop="channel_template">
+          <el-select v-model="editChannelForm.channel_template"
+                     placeholder="请选择">
+            <el-option v-for="template in templates"
+                       :key="template.template_id"
+                       :label="template.template_name"
+                       :value="template.template_name"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="是否启用"
                       prop="is_active">
           <el-switch v-model="editChannelForm.is_active"></el-switch>
@@ -163,7 +185,7 @@ export default {
   props: {
     channelType: String
   },
-  data () {
+  data() {
     return {
       typeJson: {
         dingding: '钉钉渠道',
@@ -185,17 +207,35 @@ export default {
         channel_type: this.channelType,
         channel_name: '',
         channel_access: '',
+        channel_template: '',
         is_active: true
       },
       // 表单的验证规则数据
       channelFormRules: {
+        channel_template: [
+          { required: true, message: '请关联模板', trigger: 'blur' },
+          {
+            message: '请关联模板',
+            trigger: 'blur'
+          }
+        ],
         channel_name: [
           { required: true, message: '请输入渠道名称', trigger: 'blur' },
-          { min: 3, max: 30, message: '用户名在3~30个字符之间', trigger: 'blur' }
+          {
+            min: 3,
+            max: 30,
+            message: '用户名在3~30个字符之间',
+            trigger: 'blur'
+          }
         ],
         channel_access: [
           { required: true, message: '请输入渠道地址', trigger: 'blur' },
-          { min: 3, max: 30, message: '用户名在3~1000个字符之间', trigger: 'blur' }
+          {
+            min: 3,
+            max: 30,
+            message: '用户名在3~1000个字符之间',
+            trigger: 'blur'
+          }
         ]
       },
       // 控制修改对话框的展示与否
@@ -204,26 +244,46 @@ export default {
         channel_id: '',
         channel_name: '',
         channel_access: '',
+        channel_template: '',
         is_active: true
       },
       editChannelFormRules: {
+        channel_template: [
+          { required: true, message: '请关联模板', trigger: 'blur' },
+          {
+            message: '请关联模板',
+            trigger: 'blur'
+          }
+        ],
         channel_name: [
           { required: true, message: '请输入渠道名称', trigger: 'blur' },
-          { min: 3, max: 30, message: '用户名在3~30个字符之间', trigger: 'blur' }
+          {
+            min: 3,
+            max: 30,
+            message: '用户名在3~30个字符之间',
+            trigger: 'blur'
+          }
         ],
         channel_access: [
           { required: true, message: '请输入渠道地址', trigger: 'blur' },
-          { min: 3, max: 30, message: '用户名在3~1000个字符之间', trigger: 'blur' }
+          {
+            min: 3,
+            max: 30,
+            message: '用户名在3~1000个字符之间',
+            trigger: 'blur'
+          }
         ]
-      }
+      },
+      templates: []
     }
   },
-  created () {
+  created() {
     console.log(this.channelType)
     this.getData()
+    this.getTemplateData()
   },
   methods: {
-    async getData () {
+    async getData() {
       const { data: res } = await this.$http.get('alarmChannel/get.json', {
         params: this.queryParm
       })
@@ -234,21 +294,33 @@ export default {
       this.total = res.data.total
       console.log(res)
     },
+    async getTemplateData() {
+      const { data: res } = await this.$http.get('alarmTemplate/get.json', {
+        params: {
+          template_type: this.channelType
+        }
+      })
+      if (res.status !== 200) {
+        return this.$message.error(res.message)
+      }
+      this.templates = res.data.data
+      console.log(res)
+    },
     // 监听 页码 改变事件
-    handleSizeChange (newsize) {
+    handleSizeChange(newsize) {
       console.log(newsize)
       this.queryParm.pagesize = newsize
       this.queryParm.pagenum = 1
       this.getData()
     },
     // 监听 页码值 改变
-    handleCurrentChange (newpage) {
+    handleCurrentChange(newpage) {
       console.log(newpage)
       this.queryParm.pagenum = newpage
       this.getData()
     },
     // 改变状态
-    async changeState (result) {
+    async changeState(result) {
       const { data: res } = await this.$http.post('alarmChannel/update.json', {
         channel_id: result.channel_id,
         channel_name: result.channel_name,
@@ -262,12 +334,12 @@ export default {
       this.$message.success('更新状态成功')
     },
     // 监听添加对话框关闭状态
-    dialogClosed () {
+    dialogClosed() {
       this.$refs.channelFormRef.resetFields()
     },
     // 点击添加按钮，创建渠道
-    addChannel () {
-      this.$refs.channelFormRef.validate(async vaild => {
+    addChannel() {
+      this.$refs.channelFormRef.validate(async (vaild) => {
         if (!vaild) return
         // 请求接口创建渠道
         const formdata = new FormData()
@@ -275,37 +347,63 @@ export default {
         formdata.append('channel_name', this.channelForm.channel_name)
         formdata.append('channel_access', this.channelForm.channel_access)
         formdata.append('is_active', this.channelForm.is_active)
-        const { data: res } = await this.$http.post('alarmChannel/create.json', formdata, { headers: { 'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryn8D9asOnAnEU4Js0' } })
+        formdata.append('template_name', this.channelForm.channel_template)
+        const { data: res } = await this.$http.post(
+          'alarmChannel/create.json',
+          formdata,
+          {
+            headers: {
+              'Content-Type':
+                'multipart/form-data; boundary=----WebKitFormBoundaryn8D9asOnAnEU4Js0'
+            }
+          }
+        )
         console.log(res)
         if (res.status !== 200) {
-        return this.$message.error(res.message)
-      }
+          return this.$message.error(res.message)
+        }
         this.$message.success('添加渠道成功')
         this.dialogVisible = false
         this.getData()
       })
     },
     // 编辑修改
-    editChannel (channelId, channelName, channelAccess, isActive) {
+    editChannel(channelId, channelName, channelAccess, templateName, isActive) {
       this.editChannelForm.channel_id = channelId
       this.editChannelForm.channel_name = channelName
       this.editChannelForm.channel_access = channelAccess
+      this.editChannelForm.channel_template = templateName
       this.editChannelForm.is_active = isActive
       this.editCHannelDialogVisible = true
     },
-    editDialogClosed () {
+    // editTemplateFor(templateId) {
+    //   console.log(templateId)
+    //   let i = 0
+    //   const len = this.templates.len
+    //   for (;i<len; i++) {
+    //     if (this.templates[i].template_id === templateId) {
+    //       this.editChannelForm.channel_template = this.templates[i].template_name
+    //     }
+    //   }
+
+    // },
+    editDialogClosed() {
       this.$refs.editChannelFormRef.resetFields()
     },
-    updateChannel () {
-      this.$refs.editChannelFormRef.validate(async vaild => {
+    updateChannel() {
+      this.$refs.editChannelFormRef.validate(async (vaild) => {
         if (!vaild) return
         // 请求接口创建渠道
-        const { data: res } = await this.$http.post('alarmChannel/update.json', {
-          channel_id: this.editChannelForm.channel_id,
-          channel_name: this.editChannelForm.channel_name,
-          channel_access: this.editChannelForm.channel_access,
-          is_active: this.editChannelForm.is_active
-        })
+        const { data: res } = await this.$http.post(
+          'alarmChannel/update.json',
+          {
+            channel_id: this.editChannelForm.channel_id,
+            channel_name: this.editChannelForm.channel_name,
+            channel_access: this.editChannelForm.channel_access,
+            is_active: this.editChannelForm.is_active,
+            template_name: this.editChannelForm.channel_template
+          }
+        )
         if (res.status !== 200) {
           return this.$message.error(res.message)
         }
@@ -314,14 +412,18 @@ export default {
         this.getData()
       })
     },
-    async deleteChannelById (channelId) {
+    async deleteChannelById(channelId) {
       console.log(channelId)
       // 弹窗询问
-      const resultConfirm = await this.$confirm('此操作将永久删除该渠道, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).catch(err => err) // 捕获错误返回给 resultConfirm
+      const resultConfirm = await this.$confirm(
+        '此操作将永久删除该渠道, 是否继续?',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      ).catch((err) => err) // 捕获错误返回给 resultConfirm
       console.log(resultConfirm)
       if (resultConfirm !== 'confirm') {
         return this.$message.info('已取消删除')
@@ -351,5 +453,15 @@ export default {
   margin-top: 15px;
   font-size: 12px;
   // table-layout: auto !important;
+}
+.channelWebhook {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.iconfont icon-guanlian {
+  font-size: 12px !important;
+  size: 12px !important;
 }
 </style>

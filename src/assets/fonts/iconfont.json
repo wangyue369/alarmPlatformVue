@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "584805",
+      "name": "关联",
+      "font_class": "guanlian",
+      "unicode": "e62a",
+      "unicode_decimal": 58922
+    },
+    {
+      "icon_id": "2325910",
+      "name": "复制",
+      "font_class": "fuzhi",
+      "unicode": "e636",
+      "unicode_decimal": 58934
+    },
+    {
+      "icon_id": "11372665",
+      "name": "复制",
+      "font_class": "fuzhi1",
+      "unicode": "e8b0",
+      "unicode_decimal": 59568
+    },
+    {
       "icon_id": "1445606",
       "name": "webhook",
       "font_class": "webhook",
