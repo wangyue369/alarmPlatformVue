@@ -34,7 +34,9 @@
                          label="#"></el-table-column>
         <el-table-column label="告警渠道名称"
                          prop="channel_name"></el-table-column>
-        <el-table-column label="告警渠道地址"
+        <el-table-column show-overflow-tooltip
+                         width="160px"
+                         label="告警渠道地址"
                          prop="channel_access"></el-table-column>
         <el-table-column label="创建时间"
                          prop="create_time"></el-table-column>
@@ -232,7 +234,7 @@ export default {
           { required: true, message: '请输入渠道地址', trigger: 'blur' },
           {
             min: 3,
-            max: 30,
+            max: 1000,
             message: '用户名在3~1000个字符之间',
             trigger: 'blur'
           }
@@ -268,7 +270,7 @@ export default {
           { required: true, message: '请输入渠道地址', trigger: 'blur' },
           {
             min: 3,
-            max: 30,
+            max: 1000,
             message: '用户名在3~1000个字符之间',
             trigger: 'blur'
           }

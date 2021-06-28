@@ -111,7 +111,7 @@
                     :placeholder="create_template_content['weixin']"
                     v-model="templateForm.template_content"></el-input>
         </el-form-item>
-      </el-form>>
+      </el-form>
       <!-- 内容底部区 -->
       <span slot="footer"
             class="dialog-footer">
