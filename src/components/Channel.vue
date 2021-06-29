@@ -58,8 +58,12 @@
                          width="160px">
         </el-table-column>
         <el-table-column show-overflow-tooltip
-                         label="模板名称"
-                         prop="template_name">
+                         label="告警模板"
+                         prop="alarm_template_name">
+        </el-table-column>
+        <el-table-column show-overflow-tooltip
+                         label="恢复模板"
+                         prop="restore_template_name">
         </el-table-column>
         <el-table-column label="操作"
                          width="180px">
@@ -71,7 +75,8 @@
               <el-button type="primary"
                          icon="el-icon-edit"
                          size="mini"
-                         @click="editChannel(scope.row.channel_id,scope.row.channel_name,scope.row.channel_access,scope.row.template_name,scope.row.is_active)"></el-button>
+                         @click="editChannel(scope.row.channel_id,scope.row.channel_name,scope.row.channel_access,scope.row.alarm_template_name,scope.row.restore_template_name,scope.row.is_active)">
+              </el-button>
             </el-tooltip>
             <el-tooltip effect="dark"
                         content="删除"
@@ -114,14 +119,24 @@
                       prop="channel_access">
           <el-input v-model="channelForm.channel_access"></el-input>
         </el-form-item>
-        <el-form-item label="关联模板"
-                      prop="channel_template">
-          <el-select v-model="channelForm.channel_template"
+        <el-form-item label="告警模板"
+                      prop="channel_alarm_template">
+          <el-select v-model="channelForm.channel_alarm_template"
                      placeholder="请选择">
-            <el-option v-for="template in templates"
-                       :key="template.template_id"
-                       :label="template.template_name"
-                       :value="template.template_name"></el-option>
+            <el-option v-for="alarm in templates.alarm"
+                       :key="alarm.template_id"
+                       :label="alarm.template_name"
+                       :value="alarm.template_name"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="恢复模板"
+                      prop="channel_restore_template">
+          <el-select v-model="channelForm.channel_restore_template"
+                     placeholder="请选择">
+            <el-option v-for="restore in templates.restore"
+                       :key="restore.template_id"
+                       :label="restore.template_name"
+                       :value="restore.template_name"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="是否启用"
@@ -141,7 +156,7 @@
     <!-- 修改对话框 -->
     <el-dialog title="提示"
                :visible.sync="editCHannelDialogVisible"
-               width="50%"
+               width="30%"
                @close="editDialogClosed">
       <!-- 修改对话框内容区 -->
       <el-form :model="editChannelForm"
@@ -156,14 +171,24 @@
                       prop="channel_access">
           <el-input v-model="editChannelForm.channel_access"></el-input>
         </el-form-item>
-        <el-form-item label="关联模板"
-                      prop="channel_template">
-          <el-select v-model="editChannelForm.channel_template"
+        <el-form-item label="告警模板"
+                      prop="channel_alarm_template">
+          <el-select v-model="editChannelForm.channel_alarm_template"
                      placeholder="请选择">
-            <el-option v-for="template in templates"
-                       :key="template.template_id"
-                       :label="template.template_name"
-                       :value="template.template_name"></el-option>
+            <el-option v-for="alarm in templates.alarm"
+                       :key="alarm.template_id"
+                       :label="alarm.template_name"
+                       :value="alarm.template_name"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="恢复模板"
+                      prop="channel_restore_template">
+          <el-select v-model="editChannelForm.channel_restore_template"
+                     placeholder="请选择">
+            <el-option v-for="restore in templates.restore"
+                       :key="restore.template_id"
+                       :label="restore.template_name"
+                       :value="restore.template_name"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="是否启用"
@@ -209,15 +234,23 @@ export default {
         channel_type: this.channelType,
         channel_name: '',
         channel_access: '',
-        channel_template: '',
+        channel_alarm_template: '',
+        channel_restore_template: '',
         is_active: true
       },
       // 表单的验证规则数据
       channelFormRules: {
-        channel_template: [
-          { required: true, message: '请关联模板', trigger: 'blur' },
+        channel_alarm_template: [
+          { required: true, message: '请选择告警模板', trigger: 'blur' },
           {
-            message: '请关联模板',
+            message: '请选择告警模板',
+            trigger: 'blur'
+          }
+        ],
+        channel_restore_template: [
+          { required: true, message: '请选择恢复模板', trigger: 'blur' },
+          {
+            message: '请选择恢复模板',
             trigger: 'blur'
           }
         ],
@@ -246,14 +279,22 @@ export default {
         channel_id: '',
         channel_name: '',
         channel_access: '',
-        channel_template: '',
+        channel_alarm_template: '',
+        channel_restore_template: '',
         is_active: true
       },
       editChannelFormRules: {
-        channel_template: [
-          { required: true, message: '请关联模板', trigger: 'blur' },
+        channel_alarm_template: [
+          { required: true, message: '请选择告警模板', trigger: 'blur' },
           {
-            message: '请关联模板',
+            message: '请选择告警模板',
+            trigger: 'blur'
+          }
+        ],
+        channel_restore_template: [
+          { required: true, message: '请选择恢复模板', trigger: 'blur' },
+          {
+            message: '请选择恢复模板',
             trigger: 'blur'
           }
         ],
@@ -276,7 +317,10 @@ export default {
           }
         ]
       },
-      templates: []
+      templates: {
+        alarm: [],
+        restore: []
+      }
     }
   },
   created() {
@@ -299,13 +343,13 @@ export default {
     async getTemplateData() {
       const { data: res } = await this.$http.get('alarmTemplate/get.json', {
         params: {
-          template_type: this.channelType
+          channel_type: this.channelType
         }
       })
       if (res.status !== 200) {
         return this.$message.error(res.message)
       }
-      this.templates = res.data.data
+      this.templates = res.data
       console.log(res)
     },
     // 监听 页码 改变事件
@@ -349,7 +393,14 @@ export default {
         formdata.append('channel_name', this.channelForm.channel_name)
         formdata.append('channel_access', this.channelForm.channel_access)
         formdata.append('is_active', this.channelForm.is_active)
-        formdata.append('template_name', this.channelForm.channel_template)
+        formdata.append(
+          'alarm_template_name',
+          this.channelForm.channel_alarm_template
+        )
+        formdata.append(
+          'restore_template_name',
+          this.channelForm.channel_restore_template
+        )
         const { data: res } = await this.$http.post(
           'alarmChannel/create.json',
           formdata,
@@ -370,11 +421,19 @@ export default {
       })
     },
     // 编辑修改
-    editChannel(channelId, channelName, channelAccess, templateName, isActive) {
+    editChannel(
+      channelId,
+      channelName,
+      channelAccess,
+      alarmTemplateName,
+      restoreTemplateName,
+      isActive
+    ) {
       this.editChannelForm.channel_id = channelId
       this.editChannelForm.channel_name = channelName
       this.editChannelForm.channel_access = channelAccess
-      this.editChannelForm.channel_template = templateName
+      this.editChannelForm.channel_alarm_template = alarmTemplateName
+      this.editChannelForm.channel_restore_template = restoreTemplateName
       this.editChannelForm.is_active = isActive
       this.editCHannelDialogVisible = true
     },
@@ -403,7 +462,8 @@ export default {
             channel_name: this.editChannelForm.channel_name,
             channel_access: this.editChannelForm.channel_access,
             is_active: this.editChannelForm.is_active,
-            template_name: this.editChannelForm.channel_template
+            alarm_template_name: this.editChannelForm.channel_alarm_template,
+            restore_template_name: this.editChannelForm.channel_restore_template
           }
         )
         if (res.status !== 200) {

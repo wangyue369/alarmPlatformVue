@@ -33,7 +33,9 @@
                          label="#"></el-table-column>
         <el-table-column label="告警模板名称"
                          prop="template_name"></el-table-column>
-        <el-table-column label="告警模板类型"
+        <el-table-column label="渠道类型"
+                         prop="channel_type"></el-table-column>
+        <el-table-column label="模板类型"
                          prop="template_type"></el-table-column>
         <!-- 告警模板 -->
         <el-table-column show-overflow-tooltip
@@ -54,7 +56,7 @@
               <el-button type="primary"
                          icon="el-icon-edit"
                          size="mini"
-                         @click="editTemplate(scope.row.template_id,scope.row.template_type,scope.row.template_name,scope.row.template_content)"></el-button>
+                         @click="editTemplate(scope.row.template_id,scope.row.channel_type,scope.row.template_type, scope.row.template_name,scope.row.template_content)"></el-button>
             </el-tooltip>
             <el-tooltip effect="dark"
                         content="删除"
@@ -88,16 +90,26 @@
                :rules="templateFormRules"
                ref="createTemplateFormRef"
                label-width="80px">
-        <el-form-item label="模板类型"
-                      prop="template_type">
-          <el-select v-model="templateForm.template_type"
-                     placeholder="请选择模板类型">
+        <el-form-item label="渠道类型"
+                      prop="channel_type">
+          <el-select v-model="templateForm.channel_type"
+                     placeholder="请选择渠道类型">
             <el-option label="企业微信"
                        value="weixin"></el-option>
             <el-option label="钉钉"
                        value="dingding"></el-option>
             <el-option label="飞书"
                        value="feishu"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="模板类型"
+                      prop="template_type">
+          <el-select v-model="templateForm.template_type"
+                     placeholder="请选择模板类型">
+            <el-option label="告警"
+                       value="alarm"></el-option>
+            <el-option label="恢复"
+                       value="restore"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="模板名称"
@@ -130,6 +142,11 @@
                :rules="editTemplateFormRules"
                ref="editTemplateFormRef"
                label-width="80px">
+        <el-form-item label="渠道类型"
+                      prop="channel_type">
+          <el-input :disabled="true"
+                    v-model="editTemplateForm.channel_type"></el-input>
+        </el-form-item>
         <el-form-item label="模板类型"
                       prop="template_type">
           <el-input :disabled="true"
@@ -171,12 +188,14 @@ export default {
         feishu: 'sdsdasdsad\nsdasdsada\n'
       },
       templateForm: {
+        channel_type: '',
         template_type: '',
         template_name: '',
         template_content: ''
       },
       editTemplateForm: {
         template_id: '',
+        channel_type: '',
         template_type: '',
         template_name: '',
         template_content: ''
@@ -188,6 +207,9 @@ export default {
       },
       // 表单的验证规则数据
       templateFormRules: {
+        channel_type: [
+          { required: true, message: '请选择渠道类型', trigger: 'change' }
+        ],
         template_type: [
           { required: true, message: '请选择模板类型', trigger: 'change' }
         ],
@@ -212,6 +234,9 @@ export default {
       },
       // 表单的验证规则数据
       editTemplateFormRules: {
+        channel_type: [
+          { required: true, message: '请选择渠道类型', trigger: 'change' }
+        ],
         template_type: [
           { required: true, message: '请选择模板类型', trigger: 'change' }
         ],
@@ -272,6 +297,7 @@ export default {
       this.$refs.createTemplateFormRef.validate(async (valid) => {
         if (!valid) return
         const formdata = new FormData()
+        formdata.append('channel_type', this.templateForm.channel_type)
         formdata.append('template_type', this.templateForm.template_type)
         formdata.append('template_name', this.templateForm.template_name)
         formdata.append('template_content', this.templateForm.template_content)
@@ -294,7 +320,14 @@ export default {
         this.getData()
       })
     },
-    editTemplate(templateId, templateType, templateName, templateContent) {
+    editTemplate(
+      templateId,
+      channelType,
+      templateType,
+      templateName,
+      templateContent
+    ) {
+      this.editTemplateForm.channel_type = channelType
       this.editTemplateForm.template_type = templateType
       this.editTemplateForm.template_id = templateId
       this.editTemplateForm.template_name = templateName
