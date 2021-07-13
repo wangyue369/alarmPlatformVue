@@ -37,6 +37,8 @@
                          prop="channel_type"></el-table-column>
         <el-table-column label="模板类型"
                          prop="template_type"></el-table-column>
+        <el-table-column label="通知类型"
+                         prop="notify_type"></el-table-column>
         <!-- 告警模板 -->
         <el-table-column show-overflow-tooltip
                          label="模板内容"
@@ -56,7 +58,8 @@
               <el-button type="primary"
                          icon="el-icon-edit"
                          size="mini"
-                         @click="editTemplate(scope.row.template_id,scope.row.channel_type,scope.row.template_type, scope.row.template_name,scope.row.template_content)"></el-button>
+                         @click="editTemplate(scope.row.template_id,scope.row.channel_type,scope.row.template_type, scope.row.template_name,scope.row.template_content, scope.row.notify_type)">
+              </el-button>
             </el-tooltip>
             <el-tooltip effect="dark"
                         content="删除"
@@ -112,6 +115,16 @@
                        value="restore"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="通知类型"
+                      prop="notify_type">
+          <el-select v-model="templateForm.notify_type"
+                     placeholder="请选择通知类型">
+            <el-option label="markdown"
+                       value="markdown"></el-option>
+            <el-option label="text"
+                       value="text"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="模板名称"
                       prop="template_name">
           <el-input v-model="templateForm.template_name"></el-input>
@@ -152,6 +165,16 @@
           <el-input :disabled="true"
                     v-model="editTemplateForm.template_type"></el-input>
         </el-form-item>
+        <el-form-item label="通知类型"
+                      prop="notify_type">
+          <el-select v-model="editTemplateForm.notify_type"
+                     placeholder="请选择通知类型">
+            <el-option label="markdown"
+                       value="markdown"></el-option>
+            <el-option label="text"
+                       value="text"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="模板名称"
                       prop="template_name">
           <el-input v-model="editTemplateForm.template_name"></el-input>
@@ -187,18 +210,25 @@ export default {
         weixin: 'weixinweixinweixin\nweixi\n',
         feishu: 'sdsdasdsad\nsdasdsada\n'
       },
+      type_json: {
+        weixin: '微信',
+        dingding: '钉钉',
+        feishu: '飞书'
+      },
       templateForm: {
         channel_type: '',
         template_type: '',
         template_name: '',
-        template_content: ''
+        template_content: '',
+        notify_type: ''
       },
       editTemplateForm: {
         template_id: '',
         channel_type: '',
         template_type: '',
         template_name: '',
-        template_content: ''
+        template_content: '',
+        notify_type: ''
       },
       queryParm: {
         search: '',
@@ -212,6 +242,9 @@ export default {
         ],
         template_type: [
           { required: true, message: '请选择模板类型', trigger: 'change' }
+        ],
+        notify_type: [
+          { required: true, message: '请选择通知类型', trigger: 'change' }
         ],
         template_name: [
           { required: true, message: '请输入模板名称', trigger: 'blur' },
@@ -239,6 +272,9 @@ export default {
         ],
         template_type: [
           { required: true, message: '请选择模板类型', trigger: 'change' }
+        ],
+        notify_type: [
+          { required: true, message: '请选择通知类型', trigger: 'change' }
         ],
         template_name: [
           { required: true, message: '请输入模板名称', trigger: 'blur' },
@@ -301,6 +337,7 @@ export default {
         formdata.append('template_type', this.templateForm.template_type)
         formdata.append('template_name', this.templateForm.template_name)
         formdata.append('template_content', this.templateForm.template_content)
+        formdata.append('notify_type', this.templateForm.notify_type)
         const { data: res } = await this.$http.post(
           'alarmTemplate/create.json',
           formdata,
@@ -325,13 +362,16 @@ export default {
       channelType,
       templateType,
       templateName,
-      templateContent
+      templateContent,
+      notifyType
     ) {
       this.editTemplateForm.channel_type = channelType
       this.editTemplateForm.template_type = templateType
       this.editTemplateForm.template_id = templateId
       this.editTemplateForm.template_name = templateName
       this.editTemplateForm.template_content = templateContent
+      this.editTemplateForm.notify_type = notifyType
+      console.log(notifyType)
       this.editTemplateDialogVisible = true
     },
     editTemplateDialogClosed() {
@@ -345,7 +385,8 @@ export default {
           {
             template_id: this.editTemplateForm.template_id,
             template_name: this.editTemplateForm.template_name,
-            template_content: this.editTemplateForm.template_content
+            template_content: this.editTemplateForm.template_content,
+            notify_type: this.editTemplateForm.notify_type
           }
         )
         if (res.status !== 200) {
